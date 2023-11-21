@@ -28,7 +28,7 @@ func RandomUser() string {
 	return RandomString(6)
 }
 
-func randomNumber(n int) string {
+func RandomNumber(n int) string {
 	var randomNumber strings.Builder
 	k := len(number)
 	for i := 0; i < n; i++ {
@@ -38,9 +38,9 @@ func randomNumber(n int) string {
 	return randomNumber.String()
 }
 func RandomMobile() string {
-	return randomNumber(11)
+	return RandomNumber(11)
 }
 
 func RandomAvatar() string {
-	return randomNumber(20)
+	return RandomNumber(20)
 }

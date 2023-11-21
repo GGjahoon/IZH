@@ -1,3 +1,19 @@
 Name: applet-api
 Host: 0.0.0.0
 Port: 8888
+Auth:
+  AccessSecret: GGjahoonIZH
+  AccessExpire: 604800
+  RefreshSecret: GGjahoonIZH
+  RefreshExpire: 2592000
+  RefreshAfter: 604800
+UserRPC:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    key: user.rpc
+  NonBlock: true
+BizRedis:
+  Host: 127.0.0.1:6379
+  Pass:
+  Type: node
