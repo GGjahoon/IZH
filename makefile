@@ -16,4 +16,6 @@ startContainers:
 	docker start mysql redis etcd
 stopContainers:
 	docker stop mysql redis etcd
+userModelMock:
+	mockgen -package mockuserModel -destination application/user/rpc/internal/mock/user_model.go github.com/GGjahoon/IZH/application/user/rpc/internal/model UserModel
 .PHONY:newmigrate usermigrateup usermigratedown user startContainers stopContainers 

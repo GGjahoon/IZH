@@ -5,12 +5,14 @@ import (
 	"fmt"
 
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/config"
+	"github.com/GGjahoon/IZH/application/user/rpc/internal/model"
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/server"
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/svc"
 	"github.com/GGjahoon/IZH/application/user/rpc/service"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	cs "github.com/zeromicro/go-zero/core/service"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -23,7 +25,9 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	ctx := svc.NewServiceContext(c)
+	conn := sqlx.NewMysql(c.DataSource)
+	userModel := model.NewUserModel(conn, c.CacheRedis)
+	ctx := svc.NewServiceContext(c, userModel)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		service.RegisterUserServer(grpcServer, server.NewUserServer(ctx))

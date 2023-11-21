@@ -44,3 +44,6 @@ func RandomMobile() string {
 func RandomAvatar() string {
 	return RandomNumber(20)
 }
+func RandoInt(min, max int64) int64 {
+	return min + rand.Int63n(max-min+1)
+}
