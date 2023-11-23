@@ -9,6 +9,7 @@ import (
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/server"
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/svc"
 	"github.com/GGjahoon/IZH/application/user/rpc/service"
+	"github.com/GGjahoon/IZH/pkg/xcode/interceptors"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	cs "github.com/zeromicro/go-zero/core/service"
@@ -36,6 +37,8 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+	//user the diy error interceptor
+	s.AddUnaryInterceptors(interceptors.ServerErrorInterceptor())
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

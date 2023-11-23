@@ -1,37 +1,63 @@
 package xcode
 
 import (
+	"context"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
+// XCode is a DIY Error interface
 type XCode interface {
 	Error() string
 	Code() int
 	Message() string
 	Details() []interface{}
 }
+
+// Code is athe real implementation of XCode
 type Code struct {
 	code int
 	msg  string
 }
 
-func (c Code) Error() string {
-	if len(c.msg) > 0 {
-		return c.msg
+// NewCode returns a new Code include all function of XCode
+func NewCode(code int, msg string) XCode {
+	return &Code{
+		code: code,
+		msg:  msg,
 	}
-	return strconv.Itoa(c.code)
 }
-func (c Code) Code() int {
-	return c.code
+func (code *Code) Error() string {
+	return code.Message()
 }
-func (c Code) Message() string {
-	return c.Error()
+func (code *Code) Code() int {
+	return code.code
 }
-func (c Code) Details() []interface{} {
+func (code *Code) Message() string {
+	return code.msg
+}
+func (code *Code) Details() []interface{} {
 	return nil
 }
 
-func String(s string) Code {
+// CodeFromError convert the error into XCode interface to response to user client
+func CodeFromError(err error) XCode {
+	err = errors.Cause(err)
+	//XCode与err均有Error()方法，将err断言为XCode
+	if code, ok := err.(XCode); ok {
+		return code
+	}
+	switch err {
+	case context.Canceled:
+		return Canceled
+	case context.DeadlineExceeded:
+		return Deadline
+	}
+	return ServerErr
+}
+
+func String(s string) XCode {
 	if len(s) == 0 {
 		return OK
 	}
@@ -39,16 +65,6 @@ func String(s string) Code {
 	if err != nil {
 		return ServerErr
 	}
-	return Code{
-		code: code,
-	}
-}
-func New(code int, msg string) Code {
-	return Code{
-		code: code,
-		msg:  msg,
-	}
-}
-func add(code int, msg string) Code {
-	return Code{code: code, msg: msg}
+	return &Code{code: code}
+
 }

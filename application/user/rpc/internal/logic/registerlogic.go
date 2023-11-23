@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/GGjahoon/IZH/application/user/rpc/internal/code"
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/model"
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/svc"
 	"github.com/GGjahoon/IZH/application/user/rpc/service"
@@ -26,6 +27,9 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 }
 
 func (l *RegisterLogic) Register(in *service.RegisterRequest) (*service.RegisterResponse, error) {
+	if len(in.Username) == 0 {
+		return nil, code.RegisterNameEmpty
+	}
 	ret, err := l.svcCtx.UserModel.Insert(l.ctx, &model.User{
 		Username:   in.Username,
 		Mobile:     in.Mobile,

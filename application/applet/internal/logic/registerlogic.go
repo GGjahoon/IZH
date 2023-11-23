@@ -3,8 +3,10 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
+	"github.com/GGjahoon/IZH/application/applet/internal/code"
 	"github.com/GGjahoon/IZH/application/applet/internal/svc"
 	"github.com/GGjahoon/IZH/application/applet/internal/types"
 	"github.com/GGjahoon/IZH/application/user/rpc/user"
@@ -35,48 +37,45 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 
 func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.RegisterResponse, err error) {
 	// remove space and check request is correct or not
-	req.Name = strings.TrimSpace(req.Name)
-	if len(req.Name) == 0 {
-		return nil, errors.New("user name cannot be empty")
+	req, err = validRequest(req)
+
+	if err != nil {
+		fmt.Println("jinruzheli")
+		return nil, err
 	}
-	req.Mobile = strings.TrimSpace(req.Mobile)
-	if len(req.Mobile) == 0 {
-		return nil, errors.New("mobile cannnot be empty")
+	fmt.Println("begin to check verificationcode")
+	// check the verificationCode is correct or not
+	fmt.Println(req.Mobile)
+	err = checkVerificationCode(l.svcCtx.BizReids, req.Mobile, req.VerificationCode)
+	if err != nil {
+		fmt.Println("check failed")
+		return nil, code.VerificationCodeMismatch
 	}
-	req.Password = strings.TrimSpace(req.Password)
-	if len(req.Password) == 0 {
-		return nil, errors.New("password cannot be empty")
-	} else {
-		req.Password = encrypt.EncPassword(req.Password)
-	}
+	fmt.Println("begin to encrypt mobile")
+	// encrypt the mobile
 	mobile, err := encrypt.EncMobile(req.Mobile)
 	if err != nil {
 		logx.Errorf("EncMobile : %s error : %v", req.Mobile, err)
 		return nil, err
 	}
-	req.VerificationCode = strings.TrimSpace(req.VerificationCode)
-	if len(req.VerificationCode) == 0 {
-		return nil, errors.New("verification code cannot be empty")
-	}
-	// check the verificationCode is correct or not
-	err = checkVerificationCode(l.svcCtx.BizReids, req.Mobile, req.VerificationCode)
-	if err != nil {
-		return nil, err
-	}
+	fmt.Println("find by mobile")
 	// check this phone number is registered or not
-	userRet, err := l.svcCtx.UserRpc.FindByMobile(l.ctx, &user.FindByMobileRequest{Mobile: req.Mobile})
+	userRet, err := l.svcCtx.UserRpc.FindByMobile(l.ctx, &user.FindByMobileRequest{Mobile: mobile})
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("not found in db")
 	if userRet != nil && userRet.UserId > 0 {
-		return nil, errors.New("the mobile has registered already")
+		return nil, code.MobileHasRegistered
 	}
 	//call user rpc service to save this user in db
+	fmt.Println("begin to register user in db")
 	regRet, err := l.svcCtx.UserRpc.Register(l.ctx, &user.RegisterRequest{
 		Username: req.Name,
 		Mobile:   mobile,
 	})
 	if err != nil {
+		fmt.Println("register failed")
 		return nil, err
 	}
 	//if save user successed , create a token and append into the response
@@ -110,4 +109,22 @@ func checkVerificationCode(rds *redis.Redis, mobile string, code string) error {
 		return errors.New("verification code is not correct")
 	}
 	return nil
+}
+func validRequest(req *types.RegisterRequest) (*types.RegisterRequest, error) {
+	req.Name = strings.TrimSpace(req.Name)
+	req.Mobile = strings.TrimSpace(req.Mobile)
+	if len(req.Mobile) == 0 {
+		return nil, code.RegisterMobileEmpty
+	}
+	req.Password = strings.TrimSpace(req.Password)
+	if len(req.Password) == 0 {
+		return nil, code.RegisterPasswdEmpty
+	} else {
+		req.Password = encrypt.EncPassword(req.Password)
+	}
+	req.VerificationCode = strings.TrimSpace(req.VerificationCode)
+	if len(req.VerificationCode) == 0 {
+		return nil, code.VerificationCodeEmpty
+	}
+	return req, nil
 }
