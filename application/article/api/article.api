@@ -1,0 +1,28 @@
+syntax = "v1"
+
+type (
+	PublishRequest {
+		Title       string `json:"title"`
+		Content     string `json:"content"`
+		Description string `json:"description"`
+		Cover       string `json:"cover"`
+	}
+	PublishResponse {
+		AriticleId int64 `json:"article_id"`
+	}
+
+	UploadCoverResponse {
+		CoverUrl string `json:"cover_url"`
+	}
+)
+
+@server(
+	prefix: /v1/article
+	jwt: Auth
+)
+service applet-api{
+	@handler PublishHandler
+	post /publish (PublishRequest) returns (PublishResponse)
+	@handler UploadCover
+	post /upload/cover returns (UploadCoverResponse)
+}

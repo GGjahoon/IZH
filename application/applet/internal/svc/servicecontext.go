@@ -11,7 +11,7 @@ import (
 type ServiceContext struct {
 	Config   config.Config
 	UserRpc  user.User
-	BizReids *redis.Redis
+	BizRedis *redis.Redis
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -20,6 +20,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:   c,
 		UserRpc:  user.NewUser(userRPC),
-		BizReids: redis.New(c.BizRedis.Host, redis.WithPass(c.BizRedis.Pass)),
+		BizRedis: redis.New(c.BizRedis.Host, redis.WithPass(c.BizRedis.Pass)),
 	}
 }

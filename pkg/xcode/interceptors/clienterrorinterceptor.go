@@ -2,6 +2,7 @@ package interceptors
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/GGjahoon/IZH/pkg/xcode"
 	"github.com/pkg/errors"
@@ -22,6 +23,8 @@ func ClientErrorInterceptor() grpc.UnaryClientInterceptor {
 			grpcStatus, _ := status.FromError(err)
 			xcode := xcode.GrpcStatusToXCode(grpcStatus)
 			err = errors.WithMessage(xcode, grpcStatus.Message())
+			fmt.Println(grpcStatus)
+			fmt.Println(grpcStatus.Details()...)
 		}
 		return err
 	}

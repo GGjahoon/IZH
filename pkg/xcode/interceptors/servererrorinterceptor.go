@@ -2,6 +2,7 @@ package interceptors
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/GGjahoon/IZH/pkg/xcode"
 	"google.golang.org/grpc"
@@ -13,6 +14,9 @@ func ServerErrorInterceptor() grpc.UnaryServerInterceptor {
 		handler grpc.UnaryHandler,
 	) (resp any, err error) {
 		resp, err = handler(ctx, req)
-		return resp, xcode.FromErr(err).Err()
+		fmt.Println("handler over")
+		xxx := xcode.FromErr(err).Err()
+		fmt.Println(xxx)
+		return resp, xxx
 	}
 }

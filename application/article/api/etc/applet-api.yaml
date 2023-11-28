@@ -1,0 +1,26 @@
+Name: applet-api
+Host: 0.0.0.0
+Port: 9092
+Auth:
+  AccessSecret: GGjahoonIZH
+  AccessExpire: 604800
+  RefreshSecret: GGjahoonIZH
+  RefreshExpire: 2592000
+  RefreshAfter: 604800
+ArticleRPC:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: article.rpc
+  NonBlock: true
+UserRPC:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+  NonBlock: true
+OSS:
+  EndPoint: oss-cn-beijing.aliyuncs.com
+  AccessKey: LTAI5tHUiknfYyrb3JSu1Gcz
+  AccessKeySecret: Hr58koSGiyF4CoE4tm6WMs757Jyetm
+  BucketName: article-cover

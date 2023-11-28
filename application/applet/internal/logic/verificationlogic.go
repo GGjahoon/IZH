@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -45,7 +46,7 @@ func (l *VerificationLogic) Verification(req *types.VerificationRequset) (resp *
 		return nil, errors.New("pass the max get verification code time")
 	}
 	// if the mobile get code before,give the code in cache,code does not change in 30 minutes
-	code, err := getActivationCache(req.Mobile, l.svcCtx.BizReids)
+	code, err := getActivationCache(req.Mobile, l.svcCtx.BizRedis)
 	if err != nil {
 		logx.Errorf("getActivationCache mobile :%s error : %v", req.Mobile, err)
 	}
@@ -59,7 +60,7 @@ func (l *VerificationLogic) Verification(req *types.VerificationRequset) (resp *
 		logx.Errorf("send sms mobile: %s error:%v", req.Mobile, err)
 		return nil, err
 	}
-	err = saveActivationCache(req.Mobile, code, l.svcCtx.BizReids)
+	err = saveActivationCache(req.Mobile, code, l.svcCtx.BizRedis)
 	if err != nil {
 		logx.Errorf("saveActivationCache Mobile:%s error :%v", req.Mobile, err)
 		return nil, err
@@ -75,18 +76,20 @@ func (l *VerificationLogic) Verification(req *types.VerificationRequset) (resp *
 
 // incrVerificationCount increase the count of get verification code for one mobile and sset the expired time
 func (l *VerificationLogic) incrVerificationCount(mobile string) error {
-	key := prefixVerificationCount + mobile
-	_, err := l.svcCtx.BizReids.Incr(key)
+	//key := prefixVerificationCount + mobile
+	key := fmt.Sprintf(prefixVerificationCount, mobile)
+	_, err := l.svcCtx.BizRedis.Incr(key)
 	if err != nil {
 		return err
 	}
-	return l.svcCtx.BizReids.Expireat(key, util.EndOfDay(time.Now()).Unix())
+	return l.svcCtx.BizRedis.Expireat(key, util.EndOfDay(time.Now()).Unix())
 }
 
 // getVerificationCount return the count of one mobile get the verification code
 func (l *VerificationLogic) getVerificationCount(mobile string) (int, error) {
-	key := prefixActivation + mobile
-	val, err := l.svcCtx.BizReids.Get(key)
+	//key := prefixActivation + mobile
+	key := fmt.Sprintf(prefixVerificationCount, mobile)
+	val, err := l.svcCtx.BizRedis.Get(key)
 	if err != nil {
 		return 0, err
 	}
@@ -98,13 +101,20 @@ func (l *VerificationLogic) getVerificationCount(mobile string) (int, error) {
 
 // getActivationCache return the verification code in redis
 func getActivationCache(mobile string, rds *redis.Redis) (string, error) {
-	key := prefixActivation + mobile
-
+	//key := prefixActivation + mobile
+	key := fmt.Sprintf(prefixActivation, mobile)
 	return rds.Get(key)
 }
 
 // saveActivationCache save the verification code in redis cache
 func saveActivationCache(mobile string, code string, rds *redis.Redis) error {
-	key := prefixActivation + mobile
+	//key := prefixActivation + mobile
+	key := fmt.Sprintf(prefixActivation, mobile)
 	return rds.Setex(key, code, expireActivation)
 }
+
+// func delActivationCache(mobile string, rds *redis.Redis) error {
+// 	key := fmt.Sprintf(prefixActivation, mobile)
+// 	_, err := rds.Del(key)
+// 	return err
+// }

@@ -23,7 +23,7 @@ func NewStatus(code Code) XCode {
 	return &Status{
 		sts: &types.Status{
 			Code:    int32(code.code),
-			Message: code.msg,
+			Message: code.Message(),
 		},
 	}
 }
@@ -40,7 +40,6 @@ func (s *Status) Message() string {
 	return s.sts.Message
 }
 
-// Details append the
 func (s *Status) Details() []interface{} {
 	if s == nil || s.sts == nil {
 		return nil
@@ -63,17 +62,14 @@ func (s *Status) Details() []interface{} {
 // must convert the err (which is XCode format) into gRPC status
 func FromErr(err error) *status.Status {
 	err = errors.Cause(err)
-	fmt.Println("start to convert err to Xcode")
 	//use type assertion to conver the err into XCode format
 	if code, ok := err.(XCode); ok {
-		fmt.Println("error is Xcode")
 		// if type assertion success , call func convert the Code into grpc status
 		grpcStatus, err := gRPCStatusFromXCode(code)
 		if err == nil {
 			return grpcStatus
 		}
 	}
-	fmt.Println("xxxxxxxxxxxxxxxxxxxxxxxx")
 	var grpcStatus *status.Status
 	switch err {
 	case context.Canceled:
@@ -81,6 +77,11 @@ func FromErr(err error) *status.Status {
 	case context.DeadlineExceeded:
 		grpcStatus, _ = gRPCStatusFromXCode(Deadline)
 	default:
+		if err == nil {
+			return nil
+		}
+		// code := NewCode(123456, err.Error())
+		// grpcStatus, _ = gRPCStatusFromXCode(code)
 		grpcStatus, _ = status.FromError(err)
 	}
 	return grpcStatus
@@ -90,13 +91,14 @@ func FromErr(err error) *status.Status {
 func gRPCStatusFromXCode(code XCode) (*status.Status, error) {
 	var sts *Status
 	switch v := code.(type) {
-	// if type is *Status
+	//if type is *Status
 	case *Status:
 		sts = v
-	// if type is *Code, generate a new *Status with Code(return a XCode) and assert XCode to *Status
+	//if type is *Code, generate a new *Status with Code(return a XCode) and assert XCode to *Status
 	case *Code:
 		sts = NewStatus(*v).(*Status)
 	default:
+		fmt.Println("now in grpc from xcode default")
 		sts = NewStatus(Code{code: code.Code(), msg: code.Message()}).(*Status)
 		for _, detail := range code.Details() {
 			if msg, ok := detail.(proto.Message); ok {
@@ -108,8 +110,6 @@ func gRPCStatusFromXCode(code XCode) (*status.Status, error) {
 	stas := status.New(codes.Unknown, strconv.Itoa(sts.Code()))
 	return stas.WithDetails(sts.Proto())
 }
-
-//创建gRPC使用的status 将自定义的Status中的types.Status放入gRPC所使用的status中
 
 // WithDetails put the proto message into status's details
 func (s *Status) WithDetails(msgs ...proto.Message) (*Status, error) {
@@ -134,7 +134,7 @@ func (s *Status) Proto() *types.Status {
 
 // GrpcStatusToXCode take out the details(protomessage) in gstatus,and convert it into XCode
 func GrpcStatusToXCode(gstatus *status.Status) XCode {
-	//if there is some XCode format message in details,convert the details into XCode
+	//if there is some XCode format message in details,convert the details's message into XCode
 	details := gstatus.Details()
 	for i := len(details) - 1; i >= 0; i-- {
 		detail := details[i]
@@ -146,7 +146,7 @@ func GrpcStatusToXCode(gstatus *status.Status) XCode {
 	return toXCode(*gstatus)
 }
 
-// FromProto convert the proto message (in gstatus deatils) to XCode ()
+// FromProto convert  proto message (in gstatus deatils) to XCode ()
 func FromProto(pbMsg proto.Message) XCode {
 	//将传入的pbMsg断言为*types.Status，均拥有 ProtoReflect() 方法
 	msg, ok := pbMsg.(*types.Status)
@@ -159,6 +159,7 @@ func FromProto(pbMsg proto.Message) XCode {
 	code, _ := ServerErr.(*Code)
 	return Errorf(*code, "invalid proto message get %v", pbMsg)
 }
+
 func Errorf(code Code, format string, args ...interface{}) XCode {
 	code.msg = fmt.Sprintf(format, args...)
 	return NewStatus(code)

@@ -3,6 +3,7 @@ module github.com/GGjahoon/IZH
 go 1.21
 
 require (
+	github.com/aliyun/aliyun-oss-go-sdk v3.0.1+incompatible
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.3

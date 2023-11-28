@@ -63,7 +63,8 @@ func String(s string) XCode {
 	}
 	code, err := strconv.Atoi(s)
 	if err != nil {
-		return ServerErr
+		// use errors.new()时此处出错，所以返回serverERr
+		return &Code{msg: s}
 	}
 	return &Code{code: code}
 
