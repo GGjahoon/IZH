@@ -21,6 +21,6 @@ UserRPC:
   NonBlock: true
 OSS:
   EndPoint: oss-cn-beijing.aliyuncs.com
-  AccessKey: LTAI5tHUiknfYyrb3JSu1Gcz
-  AccessKeySecret: Hr58koSGiyF4CoE4tm6WMs757Jyetm
+  AccessKey: XXXXXXXX
+  AccessKeySecret: xxxxxxxx
   BucketName: article-cover
