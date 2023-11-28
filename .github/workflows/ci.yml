@@ -48,6 +48,6 @@ jobs:
                 sudo mv migrate /usr/bin/migrate
                  which migrate
             - name: Run User migrations
-              run: make usermigrateup
-            - name: user Test
+              run: make migrateup db=user
+            - name: Test
               run: make test
