@@ -2,7 +2,7 @@ package logic
 
 import (
 	"context"
-	"time"
+	"errors"
 
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/code"
 	"github.com/GGjahoon/IZH/application/user/rpc/internal/model"
@@ -31,11 +31,9 @@ func (l *RegisterLogic) Register(in *service.RegisterRequest) (*service.Register
 		return nil, code.RegisterNameEmpty
 	}
 	ret, err := l.svcCtx.UserModel.Insert(l.ctx, &model.User{
-		Username:   in.Username,
-		Mobile:     in.Mobile,
-		Avatar:     in.Avatar,
-		CreateTime: time.Now(),
-		UpdateTime: time.Now(),
+		Username: in.Username,
+		Mobile:   in.Mobile,
+		Avatar:   in.Avatar,
 	})
 	if err != nil {
 		logx.Errorf("Register req : %v error: %v", in, err)
@@ -44,7 +42,7 @@ func (l *RegisterLogic) Register(in *service.RegisterRequest) (*service.Register
 	userId, err := ret.LastInsertId()
 	if err != nil {
 		logx.Errorf("LatstInsertId error : %v ", err)
-		return nil, err
+		return nil, errors.New("cannot get user id")
 	}
 
 	return &service.RegisterResponse{UserId: userId}, nil

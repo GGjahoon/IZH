@@ -20,13 +20,13 @@ func TestFindById(t *testing.T) {
 
 	testCases := []struct {
 		name           string
-		req            service.FindByIdRequest
+		req            *service.FindByIdRequest
 		buildStubs     func(model *mockuserModel.MockUserModel)
 		checkeResponse func(t *testing.T, rsp *service.FindByIdResponse, err error)
 	}{
 		{
 			name: "ok",
-			req: service.FindByIdRequest{
+			req: &service.FindByIdRequest{
 				UserId: user.Id,
 			},
 			buildStubs: func(userModel *mockuserModel.MockUserModel) {
@@ -41,7 +41,7 @@ func TestFindById(t *testing.T) {
 		},
 		{
 			name: "Not Found",
-			req: service.FindByIdRequest{
+			req: &service.FindByIdRequest{
 				UserId: user.Id,
 			},
 			buildStubs: func(userModel *mockuserModel.MockUserModel) {
@@ -55,7 +55,7 @@ func TestFindById(t *testing.T) {
 		},
 		{
 			name: "DB internal Error",
-			req: service.FindByIdRequest{
+			req: &service.FindByIdRequest{
 				UserId: user.Id,
 			},
 			buildStubs: func(userModel *mockuserModel.MockUserModel) {
@@ -82,7 +82,7 @@ func TestFindById(t *testing.T) {
 			testServer := NewTestServer(t, userModel)
 
 			//call the findbyid method
-			rsp, err := testServer.FindById(context.Background(), &tc.req)
+			rsp, err := testServer.FindById(context.Background(), tc.req)
 
 			//check the response of testServer
 			tc.checkeResponse(t, rsp, err)

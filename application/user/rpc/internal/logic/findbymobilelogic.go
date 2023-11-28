@@ -9,6 +9,7 @@ import (
 	"github.com/GGjahoon/IZH/pkg/xcode"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 type FindByMobileLogic struct {
@@ -30,10 +31,10 @@ func (l *FindByMobileLogic) FindByMobile(in *service.FindByMobileRequest) (*serv
 	user, err := l.svcCtx.UserModel.FindByMobile(l.ctx, in.Mobile)
 	if err != nil {
 		logx.Errorf("FindByMobile : %s error : %v", in.Mobile, err)
+		if err == sqlx.ErrNotFound {
+			return nil, xcode.NotFound
+		}
 		return nil, xcode.FindByMobileErr
-	}
-	if user == nil {
-		return &service.FindByMobileResponse{}, nil
 	}
 
 	return &service.FindByMobileResponse{

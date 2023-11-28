@@ -19,10 +19,11 @@ func InsertUser(t *testing.T) User {
 	randomUser.Mobile = util.RandomMobile()
 	randomUser.Avatar = util.RandomAvatar()
 	randomUser.CreateTime = time.Now()
-	randomUser.UpdateTime = time.Now()
+	//randomUser.UpdateTime = time.Now()
 	ret, err := testModel.Insert(ctx, &randomUser)
 	require.NoError(t, err)
 	fmt.Println(randomUser.Username)
+	fmt.Println(ret)
 
 	// find the user inserted just,and compare
 	userId, err := ret.LastInsertId()
@@ -35,8 +36,8 @@ func InsertUser(t *testing.T) User {
 	require.Equal(t, randomUser.Username, user.Username)
 	require.Equal(t, user.Avatar, randomUser.Avatar)
 	require.Equal(t, user.Mobile, randomUser.Mobile)
-	require.WithinDuration(t, user.CreateTime, randomUser.CreateTime, time.Second)
-	require.WithinDuration(t, user.UpdateTime, randomUser.UpdateTime, time.Second)
+	require.WithinDuration(t, user.CreateTime, time.Now(), time.Second)
+	require.WithinDuration(t, user.UpdateTime, time.Now(), time.Second)
 	return *user
 }
 
