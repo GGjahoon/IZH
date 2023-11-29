@@ -1,13 +1,18 @@
 package svc
 
-import "github.com/GGjahoon/IZH/application/like/rpc/internal/config"
+import (
+	"github.com/GGjahoon/IZH/application/like/rpc/internal/config"
+	"github.com/zeromicro/go-queue/kq"
+)
 
 type ServiceContext struct {
-	Config config.Config
+	Config         config.Config
+	KqPusherClient *kq.Pusher
 }
 
-func NewServiceContext(c config.Config) *ServiceContext {
+func NewServiceContext(c config.Config, kqPusherClient *kq.Pusher) *ServiceContext {
 	return &ServiceContext{
-		Config: c,
+		Config:         c,
+		KqPusherClient: kqPusherClient,
 	}
 }

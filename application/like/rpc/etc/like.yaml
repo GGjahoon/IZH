@@ -4,3 +4,8 @@ Etcd:
   Hosts:
   - 127.0.0.1:2379
   Key: like.rpc
+KqPusherConf:
+  Brokers:
+    - 127.0.0.1:9092
+  Topic: topic-IZH-like
+Mode: test
