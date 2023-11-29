@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS like_count;
+DROP TABLE IF EXISTS like_record;
