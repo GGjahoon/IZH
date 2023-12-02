@@ -10,6 +10,7 @@ import (
 	"github.com/GGjahoon/IZH/application/article/rpc/article"
 	"github.com/GGjahoon/IZH/application/user/rpc/user"
 	"github.com/GGjahoon/IZH/pkg/xcode"
+	"github.com/GGjahoon/IZH/pkg/xcode/interceptors"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 
 	"github.com/zeromicro/go-zero/core/conf"
@@ -45,14 +46,15 @@ func main() {
 		panic(err)
 	}
 	//Initialize UserRpcClient here
-	userClient := zrpc.MustNewClient(c.UserRPC)
+	userClient := zrpc.MustNewClient(c.UserRPC, zrpc.WithUnaryClientInterceptor(interceptors.ClientErrorInterceptor()))
 	userRpcClient := user.NewUser(userClient)
 	//Initialize ArticleRpcClient here
-	articleClient := zrpc.MustNewClient(c.ArticleRPC)
+	articleClient := zrpc.MustNewClient(c.ArticleRPC, zrpc.WithUnaryClientInterceptor(interceptors.ClientErrorInterceptor()))
 	articleRpcClient := article.NewArticle(articleClient)
 
 	ctx := svc.NewServiceContext(c, oc, userRpcClient, articleRpcClient)
 	handler.RegisterHandlers(server, ctx)
+	// use custom error handler
 	httpx.SetErrorHandler(xcode.ErrHandler)
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()

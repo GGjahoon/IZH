@@ -1,6 +1,12 @@
 package model
 
-import "github.com/zeromicro/go-zero/core/stores/sqlx"
+import (
+	"context"
+	"fmt"
+
+	"github.com/zeromicro/go-zero/core/stores/cache"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+)
 
 var _ ArticleModel = (*customArticleModel)(nil)
 
@@ -9,7 +15,10 @@ type (
 	// and implement the added methods in customArticleModel.
 	ArticleModel interface {
 		articleModel
-		withSession(session sqlx.Session) ArticleModel
+		ArticlesByUserId(ctx context.Context,
+			userId, likeNum int64,
+			pubTime, sortField string, limit int,
+		) ([]*Article, error)
 	}
 
 	customArticleModel struct {
@@ -18,12 +27,33 @@ type (
 )
 
 // NewArticleModel returns a model for the database table.
-func NewArticleModel(conn sqlx.SqlConn) ArticleModel {
+func NewArticleModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) ArticleModel {
 	return &customArticleModel{
-		defaultArticleModel: newArticleModel(conn),
+		defaultArticleModel: newArticleModel(conn, c, opts...),
 	}
 }
 
-func (m *customArticleModel) withSession(session sqlx.Session) ArticleModel {
-	return NewArticleModel(sqlx.NewSqlConnFromSession(session))
+func (model *customArticleModel) ArticlesByUserId(ctx context.Context,
+	userId, likeNum int64,
+	pubTime, sortField string, limit int,
+) ([]*Article, error) {
+	var (
+		err      error
+		sql      string
+		anyField any
+		articles []*Article
+	)
+	if sortField == "like_num" {
+		anyField = likeNum
+		sql = fmt.Sprintf("select "+articleRows+" from "+model.table+" where author_id=? and like_num < ? order by %s desc limit ?", sortField)
+	} else {
+		anyField = pubTime
+		sql = fmt.Sprintf("select "+articleRows+" from "+model.table+" where author_id=? and publish_time < ? order by %s desc limit ?", sortField)
+	}
+	err = model.QueryRowsNoCacheCtx(ctx, &articles, sql, userId, anyField, limit)
+	if err != nil {
+		fmt.Println("query error")
+		return nil, err
+	}
+	return articles, nil
 }
