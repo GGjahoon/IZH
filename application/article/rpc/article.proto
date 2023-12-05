@@ -37,7 +37,23 @@ message ArticlesResponse{
     int64 articleId = 4;
 }
 
+message ArticleDeletRequest{
+    int64 userId = 1;
+    int64 articleId = 2;
+}
+message ArticleDeletResponse{   
+}
+
+message ArticleDetailRequest{
+    int64 articleId = 1;
+}
+message ARticleDetailResponse{
+    ArticleItem article = 1;
+}
+
 service Article{
     rpc Publish(PublishRequest) returns (PublishResponse);
     rpc Articles(ArticlesRequest) returns (ArticlesResponse);
+    rpc ArticleDelete(ArticleDeletRequest) returns (ArticleDeletResponse);
+    rpc ArticleDetail(ArticleDetailRequest) returns (ARticleDetailResponse);
 }

@@ -79,6 +79,7 @@ func (l *ArticlesLogic) Articles(in *pb.ArticlesRequest) (*pb.ArticlesResponse, 
 	if len(articleIds) > 0 {
 		//赋值表示已被缓存命中
 		isCache = true
+		fmt.Println("缓存被命中")
 		//判断文章列表是否结束
 		if articleIds[len(articleIds)-1] == -1 {
 			isEnd = true
@@ -111,6 +112,7 @@ func (l *ArticlesLogic) Articles(in *pb.ArticlesRequest) (*pb.ArticlesResponse, 
 		}
 	} else {
 		//缓存内没有该用户的文章列表，直接从数据库查询,默认查询20页
+		fmt.Println("从数据库中查询")
 		articles, err = l.svcCtx.ArticleModel.ArticlesByUserId(l.ctx, in.UserId, sortLikeNum,
 			sortPublishTime, sortField, types.DefaultLimit)
 		if err != nil {

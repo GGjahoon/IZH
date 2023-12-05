@@ -13,15 +13,21 @@ import (
 )
 
 type (
-	ArticleItem      = pb.ArticleItem
-	ArticlesRequest  = pb.ArticlesRequest
-	ArticlesResponse = pb.ArticlesResponse
-	PublishRequest   = pb.PublishRequest
-	PublishResponse  = pb.PublishResponse
+	ARticleDetailResponse = pb.ARticleDetailResponse
+	ArticleDeletRequest   = pb.ArticleDeletRequest
+	ArticleDeletResponse  = pb.ArticleDeletResponse
+	ArticleDetailRequest  = pb.ArticleDetailRequest
+	ArticleItem           = pb.ArticleItem
+	ArticlesRequest       = pb.ArticlesRequest
+	ArticlesResponse      = pb.ArticlesResponse
+	PublishRequest        = pb.PublishRequest
+	PublishResponse       = pb.PublishResponse
 
 	Article interface {
 		Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
 		Articles(ctx context.Context, in *ArticlesRequest, opts ...grpc.CallOption) (*ArticlesResponse, error)
+		ArticleDelete(ctx context.Context, in *ArticleDeletRequest, opts ...grpc.CallOption) (*ArticleDeletResponse, error)
+		ArticleDetail(ctx context.Context, in *ArticleDetailRequest, opts ...grpc.CallOption) (*ARticleDetailResponse, error)
 	}
 
 	defaultArticle struct {
@@ -43,4 +49,14 @@ func (m *defaultArticle) Publish(ctx context.Context, in *PublishRequest, opts .
 func (m *defaultArticle) Articles(ctx context.Context, in *ArticlesRequest, opts ...grpc.CallOption) (*ArticlesResponse, error) {
 	client := pb.NewArticleClient(m.cli.Conn())
 	return client.Articles(ctx, in, opts...)
+}
+
+func (m *defaultArticle) ArticleDelete(ctx context.Context, in *ArticleDeletRequest, opts ...grpc.CallOption) (*ArticleDeletResponse, error) {
+	client := pb.NewArticleClient(m.cli.Conn())
+	return client.ArticleDelete(ctx, in, opts...)
+}
+
+func (m *defaultArticle) ArticleDetail(ctx context.Context, in *ArticleDetailRequest, opts ...grpc.CallOption) (*ARticleDetailResponse, error) {
+	client := pb.NewArticleClient(m.cli.Conn())
+	return client.ArticleDetail(ctx, in, opts...)
 }
