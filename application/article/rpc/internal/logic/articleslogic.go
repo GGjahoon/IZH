@@ -112,14 +112,22 @@ func (l *ArticlesLogic) Articles(in *pb.ArticlesRequest) (*pb.ArticlesResponse, 
 		}
 	} else {
 		//缓存内没有该用户的文章列表，直接从数据库查询,默认查询20页
+		//若从数据库中查询，使用singleflight以避免缓存击穿
 		fmt.Println("从数据库中查询")
-		articles, err = l.svcCtx.ArticleModel.ArticlesByUserId(l.ctx, in.UserId, sortLikeNum,
-			sortPublishTime, sortField, types.DefaultLimit)
+		v, err, _ := l.svcCtx.SingleFlightGroup.Do(fmt.Sprintf("ArticlesByUserId:%d,%d",
+			in.UserId, in.SortType), func() (interface{}, error) {
+			return l.svcCtx.ArticleModel.ArticlesByUserId(l.ctx, in.UserId, sortLikeNum,
+				sortPublishTime, sortField, types.DefaultLimit)
+		})
 		if err != nil {
 			l.Logger.Errorf("ArticlesByUserId userId:%d sortField:%s error:%v", in.UserId, sortField, err)
 			return nil, err
 		}
+		if v == nil {
+			return &pb.ArticlesResponse{}, nil
+		}
 		var firstPageArticles []*model.Article
+		articles = v.([]*model.Article)
 		if len(articles) > int(in.PageSize) {
 			firstPageArticles = articles[:int(in.PageSize)]
 		} else {
@@ -204,6 +212,16 @@ func (l *ArticlesLogic) cacheArticles(ctx context.Context,
 	sortType int32,
 ) ([]int64, error) {
 	key := articlesKey(userId, sortType)
+	exist, err := l.svcCtx.BizRedis.ExistsCtx(ctx, key)
+	if err != nil {
+		logx.Errorf("ExistCtx key :%s err: %v", key, err)
+	}
+	if exist {
+		err = l.svcCtx.BizRedis.ExpireCtx(ctx, key, articlesExpire)
+		if err != nil {
+			logx.Errorf("ExipireCtx key :%s err:%v", key, err)
+		}
+	}
 	pairs, err := l.svcCtx.BizRedis.ZrevrangebyscoreWithScoresAndLimitCtx(ctx, key, 0, cursor, 0, int(pageSize))
 	if err != nil {
 		l.Logger.Errorf("ZrevrangebyscoreWithScoresAndLimitCtx key :%s err : %v", key, err)
