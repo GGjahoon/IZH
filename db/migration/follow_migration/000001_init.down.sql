@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS follow;
+DROP TABLE IF EXISTS follow_count;

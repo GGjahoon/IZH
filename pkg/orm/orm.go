@@ -64,7 +64,7 @@ func NewMysql(config *Config) (*DB, error) {
 	if config.MaxLifeTime == 0 {
 		config.MaxLifeTime = 3600
 	}
-	//此处ormLog传入为空是因为此后在gorm直接操作时加上 .Error()等语句自动转换log等级
+
 	db, err := gorm.Open(mysql.Open(config.DSN), &gorm.Config{
 		Logger: &ormLog{},
 	})
@@ -85,6 +85,7 @@ func NewMysql(config *Config) (*DB, error) {
 
 	err = db.Use(NewCustomPlugin())
 	if err != nil {
+		//fmt.Println("db use plugin failed")
 		return nil, err
 	}
 

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/zeromicro/go-zero/core/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
@@ -31,68 +31,69 @@ func (p *CustomePlugin) Initialize(db *gorm.DB) error {
 		return err
 	}
 
-	if err := db.Callback().Query().Before("gorm:queryBefore").Register("gorm:queryBefore:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Query().Before("gorm:queryBefore").Register("gorm:queryBefore:metric:trace", func(db *gorm.DB) {
 		InitSpan(db, "query")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Update().Before("gorm:updateBefore").Register("gorm:updateBefore:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Update().Before("gorm:updateBefore").Register("gorm:updateBefore:metric:trace", func(db *gorm.DB) {
 		InitSpan(db, "update")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Delete().Before("gorm:deleteBefore").Register("gorm:deleteBefore:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Delete().Before("gorm:deleteBefore").Register("gorm:deleteBefore:metric:trace", func(db *gorm.DB) {
 		InitSpan(db, "delete")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Row().Before("gorm:rowBefore").Register("gorm:rowBefore:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Row().Before("gorm:rowBefore").Register("gorm:rowBefore:metric:trace", func(db *gorm.DB) {
 		InitSpan(db, "row")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Raw().Before("gorm:rawBefore").Register("gorm:rawBefore:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Raw().Before("gorm:rawBefore").Register("gorm:rawBefore:metric:trace", func(db *gorm.DB) {
 		InitSpan(db, "raw")
 	}); err != nil {
 		return err
 	}
 
 	// After Callbakc
-	if err := db.Callback().Create().After("gorm:createAfter").Register("gorm:createAfter:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Create().After("gorm:createAfter").Register("gorm:createAfter:metric:trace", func(db *gorm.DB) {
+		//集成metrics
 		MetricAndGetSpan(db, "create")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Query().After("gorm:queryAfter").Register("gorm:queryAfter:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Query().After("gorm:queryAfter").Register("gorm:queryAfter:metric:trace", func(db *gorm.DB) {
 		MetricAndGetSpan(db, "query")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Update().After("gorm:updateAfter").Register("gorm:updateAfter:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Update().After("gorm:updateAfter").Register("gorm:updateAfter:metric:trace", func(db *gorm.DB) {
 		MetricAndGetSpan(db, "update")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Delete().After("gorm:deleteAfter").Register("gorm:deleteAfter:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Delete().After("gorm:deleteAfter").Register("gorm:deleteAfter:metric:trace", func(db *gorm.DB) {
 		MetricAndGetSpan(db, "delete")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Row().After("gorm:rowAfter").Register("gorm:rowAfter:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Row().After("gorm:rowAfter").Register("gorm:rowAfter:metric:trace", func(db *gorm.DB) {
 		MetricAndGetSpan(db, "row")
 	}); err != nil {
 		return err
 	}
 
-	if err := db.Callback().Row().After("gorm:rawAfter").Register("gorm:rawAfter:metric:trace", func(d *gorm.DB) {
+	if err := db.Callback().Raw().After("gorm:rawAfter").Register("gorm:rawAfter:metric:trace", func(db *gorm.DB) {
 		MetricAndGetSpan(db, "raw")
 	}); err != nil {
 		return err

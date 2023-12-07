@@ -1,0 +1,60 @@
+syntax = "proto3";
+package service;
+option go_package="./pb";
+
+message FollowRequest{
+    int64 userId=1;
+    int64 followedUserId=2;
+}
+message FollowResponse{
+}
+
+message UnFollowRequest{
+    int64 userId=1;
+    int64 followedUserId=2;
+}
+message UnFollowResponse{
+}
+
+message FollowListRequest{
+    int64 Id=1;
+    int64 userId=2;
+    int64 cursor=3;
+    int64 pageSize=4;
+}
+message FollowItem{
+    int64 Id=1;
+    int64 followeUserId = 2;
+    int64 fansCount=3;
+    int64 creatTime=4;
+}
+message FollowListResponse{
+    repeated FollowItem items=1;
+    int64 cursor=2;
+    bool isEnd=3;
+    int64 LastFollowerID=4;
+}
+
+message FansListRequest{
+    int64 userId=1;
+    int64 cursor=2;
+    int64 pageSize=3;
+}
+message FansItem{
+    int64 userId=1;
+    int64 fansUserId=2;
+    int64 creatTime=3;
+}
+message FansListResponse{
+    repeated FansItem items=1;
+    int64 cursor=2;
+    bool isEnd=3;
+    int64 LastFansId=4;
+}
+
+service Follow{
+    rpc Follow (FollowRequest) returns (FollowResponse);
+    rpc UnFollow (UnFollowRequest) returns (UnFollowResponse);
+    rpc FollowList (FollowListRequest) returns (FollowListResponse);
+    rpc FansList (FansListRequest) returns (FansListResponse);
+}
