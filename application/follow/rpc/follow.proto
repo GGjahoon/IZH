@@ -24,7 +24,7 @@ message FollowListRequest{
 }
 message FollowItem{
     int64 Id=1;
-    int64 followeUserId = 2;
+    int64 followedUserId = 2;
     int64 fansCount=3;
     int64 creatTime=4;
 }
@@ -32,7 +32,7 @@ message FollowListResponse{
     repeated FollowItem items=1;
     int64 cursor=2;
     bool isEnd=3;
-    int64 LastFollowerID=4;
+    int64 LastID=4;
 }
 
 message FansListRequest{
@@ -49,7 +49,7 @@ message FansListResponse{
     repeated FansItem items=1;
     int64 cursor=2;
     bool isEnd=3;
-    int64 LastFansId=4;
+    int64 LastId=4;
 }
 
 service Follow{
