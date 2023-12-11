@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.1+incompatible
+	github.com/elastic/go-elasticsearch/v8 v8.11.1
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.3
@@ -28,6 +29,7 @@ require (
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/elastic/elastic-transport-go/v8 v8.3.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
